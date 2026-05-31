@@ -63,11 +63,11 @@ BinPackParameters: false
 BitFieldColonSpacing: Both
 BraceWrapping:
   AfterCaseLabel: false
-  AfterClass: true
+  AfterClass: false
   AfterControlStatement: MultiLine
   AfterEnum: true
   AfterExternBlock: true
-  AfterFunction: true
+  AfterFunction: false
   AfterNamespace: true
   AfterObjCDeclaration: false
   AfterStruct: true

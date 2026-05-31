@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GUARD_CARLLIB_CARLLIB_HPP
+#define GUARD_CARLLIB_CARLLIB_HPP
 
 #include <string>
 
@@ -68,3 +69,5 @@ private:
   CARLLIB_SUPPRESS_C4251
   std::string m_name;
 };
+
+#endif // GUARD_CARLLIB_CARLLIB_HPP

@@ -22,9 +22,15 @@
           ninja # optional but recommended
           pkg-config
 
-          # Dependencies
+	  # Base dependencies
           catch2_3
           fmt
+          spdlog
+
+
+          # Project dependencies
+	  tomlplusplus
+          sfml
         ];
 
         # Tell CMake to use gcc

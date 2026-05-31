@@ -14,12 +14,22 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 # ---- Declare library ----
+find_package(SFML 3 REQUIRED COMPONENTS Graphics)
+find_package(spdlog REQUIRED)
+find_package(tomlplusplus REQUIRED)
 
 add_library(
     carllib_carllib
     source/carllib.cpp
 )
 add_library(carllib::carllib ALIAS carllib_carllib)
+
+target_link_libraries(
+        carllib_carllib PUBLIC
+        SFML::Graphics
+        spdlog::spdlog
+        tomlplusplus
+)
 
 include(GenerateExportHeader)
 generate_export_header(
@@ -56,6 +66,20 @@ target_include_directories(
 )
 
 target_compile_features(carllib_carllib PUBLIC cxx_std_20)
+
+# ---- Declare executable ----
+
+find_package(fmt REQUIRED)
+
+add_executable(carllib_exe source/main.cpp)
+add_executable(carllib_exe::exe ALIAS carllib_exe)
+
+set_property(TARGET carllib_exe PROPERTY OUTPUT_NAME carllib_main)
+
+target_compile_features(carllib_exe PRIVATE cxx_std_20)
+
+target_link_libraries(carllib_exe PRIVATE carllib::carllib fmt::fmt)
+
 
 # ---- Install rules ----
 
