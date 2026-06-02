@@ -21,6 +21,8 @@ find_package(tomlplusplus REQUIRED)
 add_library(
     carllib_carllib
     source/carllib.cpp
+        source/window.cpp
+        include/carllib/window.h
 )
 add_library(carllib::carllib ALIAS carllib_carllib)
 

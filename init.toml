@@ -1,5 +1,6 @@
 title = "CARLlib window"
+name = "carlibwindow"
 
-#[Window]
-#width = 800
-#height = 600
+[window]
+width = 800
+height = 600
