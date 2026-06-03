@@ -31,6 +31,9 @@
           # Project dependencies
 	  tomlplusplus
           sfml
+	  libGL
+	  libGLU
+	  glm 		# OpenGL math library
         ];
 
         # Tell CMake to use gcc

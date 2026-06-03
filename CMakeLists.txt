@@ -17,6 +17,7 @@ include(cmake/variables.cmake)
 find_package(SFML 3 REQUIRED COMPONENTS Graphics)
 find_package(spdlog REQUIRED)
 find_package(tomlplusplus REQUIRED)
+#find_package(OpenGL REQUIRED COMPONENTS GLX OpenGL)
 
 add_library(
     carllib_carllib
@@ -31,6 +32,7 @@ target_link_libraries(
         SFML::Graphics
         spdlog::spdlog
         tomlplusplus
+#        OpenGL
 )
 
 include(GenerateExportHeader)
