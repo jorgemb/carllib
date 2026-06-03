@@ -2,7 +2,8 @@
 // Created by jorge on 01/06/2026.
 //
 
-#include "../include/carllib/window.h"
+#include "carllib/window.hpp"
+
 #include <toml++/toml.hpp>
 
 namespace carllib
@@ -55,23 +56,8 @@ auto window::start_loop() -> int {
       if (event->is<sf::Event::Closed>()) {
         m_logger.info("Window is being closed");
         m_is_running = false;
-      } else if (const auto key_press = event->getIf<sf::Event::KeyPressed>()) {
-        // Key press event
-        if (m_key_press_function) {
-          m_key_press_function.value()(*key_press);
-        }
-
-        // Handle escape key
-        if (key_press->scancode == sf::Keyboard::Scancode::Escape) {
-          stop_loop();
-        }
-      } else if (const auto key_release =
-                     event->getIf<sf::Event::KeyReleased>())
-      {
-        // Key release event
-        if (m_key_release_function) {
-          m_key_release_function.value()(*key_release);
-        }
+      } else {
+        if (m_handle_event_function) m_handle_event_function.value()(*event);
       }
     }
 

@@ -4,27 +4,43 @@
 #include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
 
-#include "carllib/window.h"
+#include "carllib/cell_grid.hpp"
+#include "carllib/window.hpp"
 
-auto main(const int argc, char* argv[]) -> int {
+auto main() -> int {
   auto main_window = carllib::window::create_from_config();
   if (!main_window) {
     spdlog::error("Couldn't create new window");
     return -1;
   }
 
+  auto grid = carllib::cell_grid({200, 200}, 4);
+  auto zoom = 1.0f;
+
   // Add functions
-  main_window->set_draw_function([](sf::RenderWindow& render_window)
-  -> void {
-    auto circle = sf::CircleShape(50.f);
-    circle.setFillColor(sf::Color::Magenta);
+  main_window->set_draw_function(
+      [&grid, &zoom](sf::RenderWindow& render_window) -> void
+      {
+        // Set zoom
+        auto view = render_window.getDefaultView();
+        view.zoom(zoom);
+        render_window.setView(view);
 
-    render_window.draw(circle);
-  });
+        // Draw grid
+        render_window.draw(grid);
 
-  main_window->set_key_press_function([&main_window](auto key_press)
-  {
-  });
+        // Draw current zoom
+      });
+
+  main_window->set_handle_event_function(
+      [&zoom](const sf::Event event)
+      {
+        // Wheel scroll
+        if (auto wheel_scroll_event = event.getIf<sf::Event::MouseWheelScrolled>()) {
+          const auto factor = wheel_scroll_event->delta > 0 ? -0.1f : 0.1f;
+          zoom = std::clamp(zoom + factor, 0.1f, 1.2f);
+        }
+      });
 
   return main_window->start_loop();
 }

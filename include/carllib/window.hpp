@@ -15,10 +15,8 @@ namespace carllib
 
 // Definition for draw function
 using draw_function = std::function<void(sf::RenderWindow&)>;
+using handle_event_function = std::function<void(const sf::Event)>;
 
-// Definition for handle key press function
-using key_press_function = std::function<void(const sf::Event::KeyPressed&)>;
-using key_release_function = std::function<void(const sf::Event::KeyReleased&)>;
 
 /**
  * Represents a Window with a main loop.
@@ -50,8 +48,7 @@ public:
 
   /// Set main functions
   void set_draw_function(draw_function function){ m_draw_function = function; }
-  void set_key_press_function(key_press_function function){ m_key_press_function = function; }
-  void set_key_release_function(key_release_function function){ m_key_release_function = function; }
+  void set_handle_event_function(handle_event_function function){ m_handle_event_function = function; }
 
   /**
    * Stops the main loop and exits.
@@ -62,7 +59,6 @@ private:
    * Stops the main loop and exits
    */
   void draw();
-  void handle_input();
 
   /**
    * Private constructor
@@ -81,8 +77,7 @@ private:
 
   /// Functional
   std::optional<draw_function> m_draw_function;
-  std::optional<key_press_function> m_key_press_function;
-  std::optional<key_release_function> m_key_release_function;
+  std::optional<handle_event_function> m_handle_event_function;
 };
 
 }  // namespace carllib
