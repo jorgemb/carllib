@@ -98,10 +98,25 @@
       "hidden": true
     },
     {
+      "name": "vcpkg",
+      "description": "Resolve dependencies through vcpkg in manifest mode (Windows). Requires the VCPKG_ROOT environment variable.",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
       "name": "ci-win64",
-      "inherits": ["flags-msvc", "ci-std"],
+      "inherits": ["flags-msvc", "ci-std", "vcpkg"],
       "generator": "Visual Studio 17 2022",
       "architecture": "x64",
+      "hidden": true
+    },
+    {
+      "name": "win64-ninja",
+      "description": "Local Windows dev: Ninja + MSVC (run from a VS Developer Shell) + vcpkg. Avoids pinning a Visual Studio toolset version.",
+      "inherits": ["flags-msvc", "ci-std", "vcpkg"],
+      "generator": "Ninja",
       "hidden": true
     },
     {

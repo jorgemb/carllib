@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "carllib",
+  "version": "0.1.0",
+  "description": "Basic library for Cellular Automata and Reinforcement learning with drawing capabilities.",
+  "builtin-baseline": "eb35a05cc21c69ec1399f7532b7dd61d271ac0d1",
+  "dependencies": [
+    {
+      "name": "sfml",
+      "version>=": "3.0.0"
+    },
+    "spdlog",
+    "fmt",
+    "tomlplusplus",
+    "catch2"
+  ]
+}
