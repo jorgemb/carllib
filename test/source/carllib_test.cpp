@@ -1,10 +1,11 @@
 #include <string>
 
+#include <catch2/catch_test_macros.hpp>
+
 #include "carllib/carllib.hpp"
 
-auto main() -> int
+TEST_CASE("exported_class reports its name", "[carllib]")
 {
   auto const exported = exported_class {};
-
-  return std::string("carllib") == exported.name() ? 0 : 1;
+  CHECK(exported.name() == std::string("carllib"));
 }

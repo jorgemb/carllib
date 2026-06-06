@@ -12,13 +12,21 @@ if(PROJECT_IS_TOP_LEVEL)
   enable_testing()
 endif()
 
+find_package(Catch2 3 REQUIRED)
+include(Catch)
+
 # ---- Tests ----
 
 add_executable(carllib_test source/carllib_test.cpp)
-target_link_libraries(carllib_test PRIVATE carllib::carllib)
+target_link_libraries(
+    carllib_test PRIVATE
+    carllib::carllib
+    Catch2::Catch2WithMain
+)
 target_compile_features(carllib_test PRIVATE cxx_std_20)
 
-add_test(NAME carllib_test COMMAND carllib_test)
+# Register each Catch2 TEST_CASE as a separate CTest test.
+catch_discover_tests(carllib_test)
 
 # ---- End-of-file commands ----
 

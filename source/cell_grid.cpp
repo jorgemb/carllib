@@ -51,14 +51,17 @@ void cell_grid::resize(sf::Vector2u new_size, std::uint32_t cell_size) {
     }
   }
 
-  // Set random colors
+  // Set random colors. std::uniform_int_distribution is only defined for
+  // short/int/long/long long (and unsigned variants); 8-bit types are not
+  // permitted, so draw an unsigned int in [0, 255] and narrow to uint8_t.
   auto random_generator = std::default_random_engine {};
-  auto uniform_generator = std::uniform_int_distribution<std::uint8_t>();
+  auto uniform_generator = std::uniform_int_distribution<unsigned int>(0, 255);
+  auto next_channel = [&]
+  { return static_cast<std::uint8_t>(uniform_generator(random_generator)); };
 
   for (auto idx = 0U; idx < m_vertices.getVertexCount(); ++idx) {
-    m_vertices[idx].color = sf::Color {uniform_generator(random_generator),
-                                       uniform_generator(random_generator),
-                                       uniform_generator(random_generator)};
+    m_vertices[idx].color =
+        sf::Color {next_channel(), next_channel(), next_channel()};
   }
 
   m_size = new_size;

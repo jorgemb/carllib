@@ -33,9 +33,11 @@ target_link_libraries(
         carllib_carllib PUBLIC
         SFML::Graphics
         spdlog::spdlog
-        tomlplusplus
+        tomlplusplus::tomlplusplus
 #        OpenGL
 )
+
+
 
 include(GenerateExportHeader)
 generate_export_header(
@@ -105,3 +107,15 @@ elseif(NOT PROJECT_IS_TOP_LEVEL)
 endif()
 
 include(cmake/dev-mode.cmake)
+
+# ---- Run target ----
+
+# Convenience target: builds carllib_exe and runs it from the source root so
+# that relative config paths (e.g. init.toml) resolve correctly.
+add_custom_target(
+    run
+    COMMAND carllib_exe
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    USES_TERMINAL
+    VERBATIM
+)

@@ -12,7 +12,7 @@
       "warnings": {
         "dev": true,
         "deprecated": true,
-        "uninitialized": true,
+        "uninitialized": false,
         "unusedCli": true,
         "systemVars": false
       },
@@ -108,7 +108,7 @@
     {
       "name": "ci-win64",
       "inherits": ["flags-msvc", "ci-std", "vcpkg"],
-      "generator": "Visual Studio 17 2022",
+      "generator": "Visual Studio 18 2026",
       "architecture": "x64",
       "hidden": true
     },
