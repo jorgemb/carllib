@@ -24,8 +24,7 @@ auto window::create_from_config(std::string_view config_file_name)
   }
 
   // Read values from config file
-  auto const title = config_file["title"].value_or<std::string>("");
-  auto name = config_file["name"].value_or<std::string>("carlib");
+  auto const title = config_file["window"]["title"].value_or<std::string>("");
   auto const width = config_file["Window"]["width"].value_or<uint32_t>(800);
   auto const height = config_file["Window"]["height"].value_or<uint32_t>(800);
 
@@ -43,7 +42,7 @@ auto window::create_from_config(std::string_view config_file_name)
     return std::nullopt;
   }
 
-  auto main_window = window(std::move(render_window), name);
+  auto main_window = window(std::move(render_window));
   return std::make_optional<window>(std::move(main_window));
 }
 
@@ -54,7 +53,7 @@ auto window::start_loop() -> int {
     while (const auto event = m_render_window.pollEvent()) {
       // Close the window
       if (event->is<sf::Event::Closed>()) {
-        m_logger.info("Window is being closed");
+        m_logger->info("Window is being closed");
         m_is_running = false;
       } else {
         if (m_handle_event_function) m_handle_event_function.value()(*event);
@@ -71,7 +70,7 @@ auto window::start_loop() -> int {
 }
 
 void window::stop_loop() {
-  m_logger.info("Closing Window");
+  m_logger->info("Closing Window");
   m_is_running = false;
 }
 
@@ -81,9 +80,8 @@ void window::draw() {
   }
 }
 
-window::window(sf::RenderWindow&& render_window, std::string name)
+window::window(sf::RenderWindow&& render_window)
     : m_render_window(std::move(render_window))
-    , m_logger(name)
-    , m_name(std::move(name)) {}
+    , m_logger(spdlog::default_logger()) {}
 
 }  // namespace carllib

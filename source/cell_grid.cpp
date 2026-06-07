@@ -8,16 +8,28 @@
 #include "carllib/graphics/cell_grid.hpp"
 
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <spdlog/spdlog.h>
 
 namespace carllib::graphics
 {
 
 cell_grid::cell_grid(sf::Vector2u initial_size, std::uint32_t cell_size) {
   m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
-  resize(initial_size, cell_size);
+  resize(initial_size, cell_size, true);
 }
 
-void cell_grid::resize(sf::Vector2u new_size, std::uint32_t cell_size) {
+bool cell_grid::resize(sf::Vector2u new_size,
+                       std::uint32_t cell_size,
+                       bool randomize_colors) {
+  // Checks
+  auto total_size = static_cast<std::uint64_t>(new_size.x) * new_size.y;
+  if (total_size == 0 || total_size > std::numeric_limits<size_t>::max()) {
+    spdlog::error("Cannot resize cell_grid with dimensions {}x{}",
+                  new_size.x,
+                  new_size.y);
+    return false;
+  }
+
   // Resize buffer
   const auto total_vertices = new_size.x * new_size.y * vertices_per_quad;
   m_vertices.resize(total_vertices);
@@ -51,21 +63,24 @@ void cell_grid::resize(sf::Vector2u new_size, std::uint32_t cell_size) {
     }
   }
 
-  // Set random colors. std::uniform_int_distribution is only defined for
-  // short/int/long/long long (and unsigned variants); 8-bit types are not
-  // permitted, so draw an unsigned int in [0, 255] and narrow to uint8_t.
-  auto random_generator = std::default_random_engine {};
-  auto uniform_generator = std::uniform_int_distribution<unsigned int>(0, 255);
-  auto next_channel = [&]
-  { return static_cast<std::uint8_t>(uniform_generator(random_generator)); };
+  if (randomize_colors) {
+    // Set random colors
+    auto random_generator = std::default_random_engine {};
+    auto uniform_generator =
+        std::uniform_int_distribution<unsigned int>(0, 255);
+    auto next_channel = [&]
+    { return static_cast<std::uint8_t>(uniform_generator(random_generator)); };
 
-  for (auto idx = 0U; idx < m_vertices.getVertexCount(); ++idx) {
-    m_vertices[idx].color =
-        sf::Color {next_channel(), next_channel(), next_channel()};
+    for (auto idx = 0U; idx < m_vertices.getVertexCount(); ++idx) {
+      m_vertices[idx].color =
+          sf::Color {next_channel(), next_channel(), next_channel()};
+    }
   }
 
   m_size = new_size;
   m_cell_size = cell_size;
+
+  return true;
 }
 
 void cell_grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
@@ -73,4 +88,4 @@ void cell_grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
   target.draw(m_vertices, states);
 }
 
-}  // namespace carllib
+}  // namespace carllib::graphics

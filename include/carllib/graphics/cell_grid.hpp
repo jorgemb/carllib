@@ -14,7 +14,9 @@
 namespace carllib::graphics
 {
 
-class cell_grid: public sf::Drawable, public sf::Transformable{
+class cell_grid
+    : public sf::Drawable
+    , public sf::Transformable {
 public:
   /**
    * Create a new cell_grid of the given size
@@ -35,8 +37,11 @@ public:
    * iterations.
    * @param new_size New size in cells
    * @param cell_size
+   * @param randomize_colors
    */
-  void resize(sf::Vector2u new_size, std::uint32_t cell_size);
+  auto resize(sf::Vector2u new_size,
+              std::uint32_t cell_size,
+              bool randomize_colors) -> bool;
 
   /**
    * Sets the color in the given position. Returns False if the position
@@ -73,6 +78,6 @@ private:
   sf::VertexArray m_vertices;
 };
 
-}  // namespace carllib
+}  // namespace carllib::graphics
 
 #endif  // CARLLIB_CELL_GRID_HPP

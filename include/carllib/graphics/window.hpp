@@ -63,16 +63,15 @@ private:
   /**
    * Private constructor
    */
-  explicit window(sf::RenderWindow&& render_window, std::string name = "carllib_window");
+  explicit window(sf::RenderWindow&& render_window);
 
   // Main window
   sf::RenderWindow m_render_window;
 
   // Logger
-  spdlog::logger m_logger;
+  std::shared_ptr<spdlog::logger> m_logger;
 
   // State
-  std::string m_name;
   bool m_is_running = true;
 
   /// Functional
