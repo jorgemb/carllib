@@ -33,12 +33,14 @@ bool cell_grid::resize(sf::Vector2u new_size,
   // Resize buffer
   const auto total_vertices = new_size.x * new_size.y * vertices_per_quad;
   m_vertices.resize(total_vertices);
+  m_size = new_size;
+  m_cell_size = cell_size;
 
   // Set position of each vertex
   const auto float_cell_size = static_cast<float>(cell_size);
   for (auto col = 0U; col < new_size.x; ++col) {
     for (auto row = 0U; row < new_size.y; ++row) {
-      const auto vertex_idx = (col + (row * new_size.x)) * vertices_per_quad;
+      const auto vertex_idx = get_first_vertex_of_position({col, row});
       assert(vertex_idx <= m_vertices.getVertexCount() - vertices_per_quad);
       sf::Vertex* tri = &m_vertices[vertex_idx];
 
@@ -77,11 +79,21 @@ bool cell_grid::resize(sf::Vector2u new_size,
     }
   }
 
-  m_size = new_size;
-  m_cell_size = cell_size;
-
   return true;
 }
+
+auto cell_grid::set_color(const sf::Vector2u& position, sf::Color color)
+    -> bool {
+  // Validate the position
+  if (position.x >= m_size.x || position.y >= m_size.y) {
+    return false;
+  }
+
+  // Change the color of the given vertices
+}
+
+auto cell_grid::get_color(const sf::Vector2u& position)
+    -> std::optional<sf::Color> {}
 
 void cell_grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
   states.transform *= getTransform();

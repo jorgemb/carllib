@@ -74,9 +74,22 @@ private:
   std::uint32_t m_cell_size = 4;
   static constexpr std::uint32_t vertices_per_quad = 6;
 
+  /**
+   * Calculates the index of the first vertex of a position
+   * @param pos
+   * @return
+   */
+  constexpr auto get_first_vertex_of_position(const sf::Vector2u& pos) const
+      -> std::size_t;
+
   // Vertices
   sf::VertexArray m_vertices;
 };
+
+constexpr auto cell_grid::get_first_vertex_of_position(
+    const sf::Vector2u& pos) const -> std::size_t {
+  return (pos.x + (pos.y * m_size.x)) * vertices_per_quad;
+}
 
 }  // namespace carllib::graphics
 
