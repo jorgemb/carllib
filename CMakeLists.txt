@@ -23,9 +23,9 @@ add_library(
     carllib_carllib
     source/carllib.cpp
         source/window.cpp
-        include/carllib/window.hpp
+        include/carllib/graphics/window.hpp
         source/cell_grid.cpp
-        include/carllib/cell_grid.hpp
+        include/carllib/graphics/cell_grid.hpp
 )
 add_library(carllib::carllib ALIAS carllib_carllib)
 

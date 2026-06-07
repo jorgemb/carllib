@@ -10,7 +10,7 @@
 #include <SFML/Graphics.hpp>
 #include <spdlog/spdlog.h>
 
-namespace carllib
+namespace carllib::graphics
 {
 
 // Definition for draw function

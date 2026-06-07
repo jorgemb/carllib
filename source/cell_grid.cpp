@@ -5,11 +5,11 @@
 #include <cstddef>
 #include <random>
 
-#include "carllib/cell_grid.hpp"
+#include "carllib/graphics/cell_grid.hpp"
 
 #include <SFML/Graphics/RenderTarget.hpp>
 
-namespace carllib
+namespace carllib::graphics
 {
 
 cell_grid::cell_grid(sf::Vector2u initial_size, std::uint32_t cell_size) {

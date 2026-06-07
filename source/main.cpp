@@ -4,17 +4,17 @@
 #include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
 
-#include "carllib/cell_grid.hpp"
-#include "carllib/window.hpp"
+#include "carllib/graphics/cell_grid.hpp"
+#include "carllib/graphics/window.hpp"
 
 auto main() -> int {
-  auto main_window = carllib::window::create_from_config();
+  auto main_window = carllib::graphics::window::create_from_config();
   if (!main_window) {
     spdlog::error("Couldn't create new window");
     return -1;
   }
 
-  auto grid = carllib::cell_grid({200, 200}, 4);
+  auto grid = carllib::graphics::cell_grid({200, 200}, 4);
   auto zoom = 1.0f;
 
   // Add functions

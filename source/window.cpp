@@ -2,11 +2,11 @@
 // Created by jorge on 01/06/2026.
 //
 
-#include "carllib/window.hpp"
+#include "carllib/graphics/window.hpp"
 
 #include <toml++/toml.hpp>
 
-namespace carllib
+namespace carllib::graphics
 {
 
 auto window::create_from_config(std::string_view config_file_name)

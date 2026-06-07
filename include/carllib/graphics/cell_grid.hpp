@@ -11,7 +11,7 @@
 #include <SFML/Graphics/Transformable.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
 
-namespace carllib
+namespace carllib::graphics
 {
 
 class cell_grid: public sf::Drawable, public sf::Transformable{
