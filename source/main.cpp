@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
@@ -14,31 +15,55 @@ auto main() -> int {
     return -1;
   }
 
-  auto grid = carllib::graphics::cell_grid({200, 200}, 4);
-  auto zoom = 1.0f;
+  auto font = sf::Font("42dotSans.ttf");
+  auto grid = carllib::graphics::cell_grid({800, 800}, 1);
+  auto zoom = 1;
+  auto zoom_text = sf::Text {font};
 
   // Add functions
   main_window->set_draw_function(
-      [&grid, &zoom](sf::RenderWindow& render_window) -> void
+      [&grid, &zoom, &zoom_text](sf::RenderWindow& render_window) -> void
       {
-        // Set zoom
-        auto view = render_window.getDefaultView();
-        view.zoom(zoom);
-        render_window.setView(view);
-
         // Draw grid
         render_window.draw(grid);
 
-        // Draw current zoom
+        // Draw text
+        const auto window_size = render_window.getSize();
+        auto width = static_cast<std::uint32_t>(
+            std::ceil(window_size.x / static_cast<double>(zoom)));
+        auto height = static_cast<std::uint32_t>(
+            std::ceil(window_size.y / static_cast<double>(zoom)));
+
+        // .. check if a resize is necessary
+        if (grid.size() != sf::Vector2u {width, height}) {
+          // Grid requires resizing
+          grid.resize({width, height}, zoom, true);
+        }
+
+        zoom_text.setString(
+            fmt::format("Size: {}x{} - Zoom: {}", width, height, zoom));
+        zoom_text.setFillColor(sf::Color::Black);
+        zoom_text.setStyle(sf::Text::Style::Bold);
+        render_window.draw(zoom_text);
       });
 
   main_window->set_handle_event_function(
-      [&zoom](const sf::Event event)
+      [&zoom](sf::RenderWindow& window, const sf::Event& event)
       {
         // Wheel scroll
-        if (auto wheel_scroll_event = event.getIf<sf::Event::MouseWheelScrolled>()) {
-          const auto factor = wheel_scroll_event->delta > 0 ? -0.1f : 0.1f;
-          zoom = std::clamp(zoom + factor, 0.1f, 1.2f);
+        if (auto wheel_scroll_event =
+                event.getIf<sf::Event::MouseWheelScrolled>())
+        {
+          const auto factor =
+              static_cast<std::int32_t>(std::floor(wheel_scroll_event->delta));
+          zoom = std::clamp(zoom + factor, 1, 32);
+        } else if (const auto resize_event =
+                       event.getIf<sf::Event::Resized>()) {
+          // Update the view to match the new window size
+          const sf::FloatRect visibleArea({0.f, 0.f},
+                                    {static_cast<float>(resize_event->size.x),
+                                     static_cast<float>(resize_event->size.y)});
+          window.setView(sf::View(visibleArea));
         }
       });
 

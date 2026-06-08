@@ -50,7 +50,7 @@ public:
    * @param color
    * @return
    */
-  auto set_color(const sf::Vector2u& position, sf::Color color) -> bool;
+  auto set_color_at(const sf::Vector2u& position, sf::Color color) -> bool;
 
   /**
    * Gets the color at the given position. Returns std::nullopt in case
@@ -58,7 +58,11 @@ public:
    * @param position
    * @return
    */
-  auto get_color(const sf::Vector2u& position) -> std::optional<sf::Color>;
+  [[nodiscard]] auto get_color_at(const sf::Vector2u& position)
+      -> std::optional<sf::Color>;
+
+  // Getters
+  [[nodiscard]] auto size() const -> sf::Vector2u { return m_size; }
 
 protected:
   /**

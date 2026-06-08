@@ -37,7 +37,7 @@ auto window::create_from_config(std::string_view config_file_name)
   spdlog::info("Creating Window");
   auto render_window = sf::RenderWindow(sf::VideoMode({width, height}),
                                         title,
-                                        sf::Style::Titlebar | sf::Style::Close,
+                                        sf::Style::Default,
                                         sf::State::Windowed,
                                         context);
   if (!render_window.setActive(true)) {
@@ -60,7 +60,7 @@ auto window::start_loop() -> int {
         m_is_running = false;
       } else {
         if (m_handle_event_function) {
-          m_handle_event_function.value()(*event);
+          m_handle_event_function.value()(m_render_window, *event);
         }
       }
     }

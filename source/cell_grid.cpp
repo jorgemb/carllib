@@ -86,7 +86,7 @@ auto cell_grid::resize(sf::Vector2u new_size,
   return true;
 }
 
-auto cell_grid::set_color(const sf::Vector2u& position, sf::Color color)
+auto cell_grid::set_color_at(const sf::Vector2u& position, sf::Color color)
     -> bool {
   // Validate the position
   if (position.x >= m_size.x || position.y >= m_size.y) {
@@ -102,7 +102,7 @@ auto cell_grid::set_color(const sf::Vector2u& position, sf::Color color)
   return true;
 }
 
-auto cell_grid::get_color(const sf::Vector2u& position)
+auto cell_grid::get_color_at(const sf::Vector2u& position)
     -> std::optional<sf::Color> {
   // Validate the position
   if (position.x >= m_size.x || position.y >= m_size.y) {

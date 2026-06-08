@@ -15,7 +15,7 @@ namespace carllib::graphics
 
 // Definition for draw function
 using draw_function = std::function<void(sf::RenderWindow&)>;
-using handle_event_function = std::function<void(const sf::Event)>;
+using handle_event_function = std::function<void(sf::RenderWindow&, const sf::Event)>;
 
 /**
  * Represents a Window with a main loop.
@@ -39,8 +39,8 @@ public:
   // Copy / Move operations
   window(const window& other) = delete;
   window(window&& other) noexcept = default;
-  window& operator=(const window& other) = delete;
-  window& operator=(window&& other) noexcept = default;
+  auto operator=(const window& other) -> window& = delete;
+  auto operator=(window&& other) noexcept -> window& = default;
 
   // Destructor
   ~window() = default;
