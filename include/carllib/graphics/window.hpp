@@ -17,7 +17,6 @@ namespace carllib::graphics
 using draw_function = std::function<void(sf::RenderWindow&)>;
 using handle_event_function = std::function<void(const sf::Event)>;
 
-
 /**
  * Represents a Window with a main loop.
  */
@@ -28,8 +27,8 @@ public:
    * @param config_file_name C
    * @return
    */
-  static auto create_from_config(std::string_view config_file_name = "init.toml")
-      -> std::optional<window>;
+  static auto create_from_config(
+      std::string_view config_file_name = "init.toml") -> std::optional<window>;
 
   /**
    * Starts the main loop
@@ -44,16 +43,27 @@ public:
   window& operator=(window&& other) noexcept = default;
 
   // Destructor
-  ~window()= default;
+  ~window() = default;
 
   /// Set main functions
-  void set_draw_function(draw_function function){ m_draw_function = function; }
-  void set_handle_event_function(handle_event_function function){ m_handle_event_function = function; }
+  void set_draw_function(const draw_function& function) {
+    m_draw_function = function;
+  }
+
+  void set_handle_event_function(const handle_event_function& function) {
+    m_handle_event_function = function;
+  }
+
+  /// Get values
+  [[nodiscard]] auto size() const -> sf::Vector2u {
+    return m_render_window.getSize();
+  }
 
   /**
    * Stops the main loop and exits.
    */
   void stop_loop();
+
 private:
   /**
    * Stops the main loop and exits
@@ -79,6 +89,6 @@ private:
   std::optional<handle_event_function> m_handle_event_function;
 };
 
-}  // namespace carllib
+}  // namespace carllib::graphics
 
 #endif  // CARLLIB_WINDOW_H

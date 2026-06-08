@@ -13,17 +13,20 @@
 namespace carllib::graphics
 {
 
-cell_grid::cell_grid(sf::Vector2u initial_size, std::uint32_t cell_size) {
+cell_grid::cell_grid(const sf::Vector2u initial_size,
+                     const std::uint32_t cell_size) {
   m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
-  resize(initial_size, cell_size, true);
+  resize(initial_size, cell_size, /*randomize_colors=*/true);
 }
 
-bool cell_grid::resize(sf::Vector2u new_size,
-                       std::uint32_t cell_size,
-                       bool randomize_colors) {
+auto cell_grid::resize(sf::Vector2u new_size,
+                       const std::uint32_t cell_size,
+                       const bool randomize_colors) -> bool {
   // Checks
-  auto total_size = static_cast<std::uint64_t>(new_size.x) * new_size.y;
-  if (total_size == 0 || total_size > std::numeric_limits<size_t>::max()) {
+  if (const auto total_size =
+          static_cast<std::uint64_t>(new_size.x) * new_size.y;
+      total_size == 0 || total_size > std::numeric_limits<size_t>::max())
+  {
     spdlog::error("Cannot resize cell_grid with dimensions {}x{}",
                   new_size.x,
                   new_size.y);
@@ -67,10 +70,11 @@ bool cell_grid::resize(sf::Vector2u new_size,
 
   if (randomize_colors) {
     // Set random colors
-    auto random_generator = std::default_random_engine {};
+    auto random_generator =
+        std::default_random_engine {std::random_device {}()};
     auto uniform_generator =
         std::uniform_int_distribution<unsigned int>(0, 255);
-    auto next_channel = [&]
+    auto next_channel = [&]() -> std::uint8_t
     { return static_cast<std::uint8_t>(uniform_generator(random_generator)); };
 
     for (auto idx = 0U; idx < m_vertices.getVertexCount(); ++idx) {
@@ -90,10 +94,25 @@ auto cell_grid::set_color(const sf::Vector2u& position, sf::Color color)
   }
 
   // Change the color of the given vertices
+  const auto vertex_index = get_first_vertex_of_position(position);
+  for (auto i = 0U; i < vertices_per_quad; ++i) {
+    m_vertices[vertex_index + i].color = color;
+  }
+
+  return true;
 }
 
 auto cell_grid::get_color(const sf::Vector2u& position)
-    -> std::optional<sf::Color> {}
+    -> std::optional<sf::Color> {
+  // Validate the position
+  if (position.x >= m_size.x || position.y >= m_size.y) {
+    return std::nullopt;
+  }
+
+  // Get the color (assume the quad has the same color)
+  auto const vertex_index = get_first_vertex_of_position(position);
+  return std::make_optional(m_vertices[vertex_index].color);
+}
 
 void cell_grid::draw(sf::RenderTarget& target, sf::RenderStates states) const {
   states.transform *= getTransform();

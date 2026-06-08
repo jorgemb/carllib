@@ -35,8 +35,11 @@ auto window::create_from_config(std::string_view config_file_name)
 
   // Create render target
   spdlog::info("Creating Window");
-  auto render_window = sf::RenderWindow(
-      sf::VideoMode({width, height}), title, sf::Style::Titlebar | sf::Style::Close , sf::State::Windowed, context);
+  auto render_window = sf::RenderWindow(sf::VideoMode({width, height}),
+                                        title,
+                                        sf::Style::Titlebar | sf::Style::Close,
+                                        sf::State::Windowed,
+                                        context);
   if (!render_window.setActive(true)) {
     spdlog::error("Couldn't set main active window");
     return std::nullopt;
@@ -56,7 +59,9 @@ auto window::start_loop() -> int {
         m_logger->info("Window is being closed");
         m_is_running = false;
       } else {
-        if (m_handle_event_function) m_handle_event_function.value()(*event);
+        if (m_handle_event_function) {
+          m_handle_event_function.value()(*event);
+        }
       }
     }
 
@@ -84,4 +89,4 @@ window::window(sf::RenderWindow&& render_window)
     : m_render_window(std::move(render_window))
     , m_logger(spdlog::default_logger()) {}
 
-}  // namespace carllib
+}  // namespace carllib::graphics
