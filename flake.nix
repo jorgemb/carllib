@@ -21,7 +21,6 @@
           gnumake
           ninja # optional but recommended
           pkg-config
-	  valgrind	# Memory debugging
 
 	  # Base dependencies
           catch2_3

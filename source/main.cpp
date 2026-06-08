@@ -16,7 +16,7 @@ auto main() -> int {
   }
 
   auto font = sf::Font("42dotSans.ttf");
-  auto grid = carllib::graphics::cell_grid({800, 800}, 1);
+  auto grid = carllib::graphics::cell_grid({10, 10}, 1);
   auto zoom = 1;
   auto zoom_text = sf::Text {font};
 
@@ -37,7 +37,9 @@ auto main() -> int {
         // .. check if a resize is necessary
         if (grid.size() != sf::Vector2u {width, height}) {
           // Grid requires resizing
-          grid.resize({width, height}, zoom, true);
+          grid.resize({width, height},
+                      static_cast<std::uint32_t>(zoom),
+                      /*randomize_colors=*/true);
         }
 
         zoom_text.setString(
@@ -60,9 +62,10 @@ auto main() -> int {
         } else if (const auto resize_event =
                        event.getIf<sf::Event::Resized>()) {
           // Update the view to match the new window size
-          const sf::FloatRect visibleArea({0.f, 0.f},
-                                    {static_cast<float>(resize_event->size.x),
-                                     static_cast<float>(resize_event->size.y)});
+          const sf::FloatRect visibleArea(
+              {0.f, 0.f},
+              {static_cast<float>(resize_event->size.x),
+               static_cast<float>(resize_event->size.y)});
           window.setView(sf::View(visibleArea));
         }
       });

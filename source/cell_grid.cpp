@@ -2,13 +2,27 @@
 // Created by jorge on 03/06/2026.
 //
 
-#include <cstddef>
+#include <execution>
 #include <random>
 
 #include "carllib/graphics/cell_grid.hpp"
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <spdlog/spdlog.h>
+
+/**
+ * Generates a random int that is thread safe. Retrieved from:
+ * https://stackoverflow.com/a/21238187
+ * @param min
+ * @param max
+ * @return
+ */
+template<class T>
+T intRand(const T& min, const T& max) {
+  static thread_local std::mt19937 generator;
+  std::uniform_int_distribution<T> distribution(min, max);
+  return distribution(generator);
+}
 
 namespace carllib::graphics
 {
@@ -69,18 +83,15 @@ auto cell_grid::resize(sf::Vector2u new_size,
   }
 
   if (randomize_colors) {
-    // Set random colors
-    auto random_generator =
-        std::default_random_engine {std::random_device {}()};
-    auto uniform_generator =
-        std::uniform_int_distribution<unsigned int>(0, 255);
-    auto next_channel = [&]() -> std::uint8_t
-    { return static_cast<std::uint8_t>(uniform_generator(random_generator)); };
-
-    for (auto idx = 0U; idx < m_vertices.getVertexCount(); ++idx) {
-      m_vertices[idx].color =
-          sf::Color {next_channel(), next_channel(), next_channel()};
-    }
+    std::for_each(std::execution::par,
+                  &m_vertices[0],
+                  &m_vertices[m_vertices.getVertexCount()],
+                  [](sf::Vertex& vertex)
+                  {
+                    vertex.color = sf::Color {intRand<unsigned char>(0, 255),
+                                              intRand<unsigned char>(0, 255),
+                                              intRand<unsigned char>(0, 255)};
+                  });
   }
 
   return true;
