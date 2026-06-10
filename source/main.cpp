@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
 
+#include "carllib/ca/line_toroidal.hpp"
 #include "carllib/graphics/cell_grid.hpp"
 #include "carllib/graphics/window.hpp"
 
@@ -20,9 +21,12 @@ auto main() -> int {
   auto zoom = 1;
   auto zoom_text = sf::Text {font};
 
+  auto ca_line = carllib::ca::line_toroidal<bool, 800, 800> {};
+
   // Add functions
   main_window->set_draw_function(
-      [&grid, &zoom, &zoom_text](sf::RenderWindow& render_window) -> void
+      [&grid, &zoom, &zoom_text, &ca_line](
+          sf::RenderWindow& render_window) -> void
       {
         // Draw grid
         render_window.draw(grid);
@@ -42,6 +46,17 @@ auto main() -> int {
                       /*randomize_colors=*/true);
         }
 
+        // Fill in the grid cell
+        for (auto row = 0U; row < width; ++row) {
+          for (auto col = 0U; col < height; ++col) {
+            const auto color = ca_line.get_value_at(col, row)
+                ? sf::Color::Black
+                : sf::Color::White;
+            grid.set_color_at({row, col}, color);
+          }
+        }
+
+        // Set zoom text
         zoom_text.setString(
             fmt::format("Size: {}x{} - Zoom: {}", width, height, zoom));
         zoom_text.setFillColor(sf::Color::Black);
