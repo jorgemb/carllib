@@ -5,7 +5,7 @@
 #include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
 
-#include "carllib/ca/line_toroidal.hpp"
+#include "carllib/ca/linear_toroidal.hpp"
 #include "carllib/graphics/cell_grid.hpp"
 #include "carllib/graphics/window.hpp"
 
@@ -21,7 +21,7 @@ auto main() -> int {
   auto zoom = 1;
   auto zoom_text = sf::Text {font};
 
-  auto ca_line = carllib::ca::line_toroidal<bool, 800, 800> {};
+  auto ca_line = carllib::ca::linear_toroidal<bool> {false, false, true, false, false};
 
   // Add functions
   main_window->set_draw_function(
@@ -47,9 +47,9 @@ auto main() -> int {
         }
 
         // Fill in the grid cell
-        for (auto row = 0U; row < width; ++row) {
-          for (auto col = 0U; col < height; ++col) {
-            const auto color = ca_line.get_value_at(col, row)
+        for (auto row = 0U; row < ca_line.total_generations(); ++row) {
+          for (auto const &col: ca_line.get_generation_data(row)) {
+            const auto color = col
                 ? sf::Color::Black
                 : sf::Color::White;
             grid.set_color_at({row, col}, color);
