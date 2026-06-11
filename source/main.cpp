@@ -24,7 +24,7 @@ auto main() -> int {
   auto zoom = 4;
   auto zoom_text = sf::Text {font};
 
-  auto ca_line = carllib::ca::wolfram(carllib::ca::wolfram_number {110}, 4000);
+  auto ca_line = carllib::ca::wolfram(carllib::ca::wolfram_number {90 }, 4000);
   while (ca_line.total_generations() < 800) {
     ca_line.calculate_next_generation();
   }
@@ -60,10 +60,11 @@ auto main() -> int {
         // Fill in the grid cell
         for (auto row = 0U; row < ca_line.total_generations(); ++row) {
           for (auto const [col, value] : std::views::enumerate(
-                   ca_line.get_generation_data(row) | std::views::drop((ca_line.width() - width)/2)))
+                   ca_line.get_generation_data(row)
+                   | std::views::drop((ca_line.width() - width) / 2)))
           {
-        const auto color = value ? sf::Color::Black : sf::Color::White;
-        grid.set_color_at({static_cast<unsigned>(col), row}, color);
+            const auto color = value ? sf::Color::Black : sf::Color::White;
+            grid.set_color_at({static_cast<unsigned>(col), row}, color);
           }
         }
 

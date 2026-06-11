@@ -17,7 +17,12 @@ include(Catch)
 
 # ---- Tests ----
 
-add_executable(carllib_test source/carllib_test.cpp)
+add_executable(carllib_test
+    source/carllib_test.cpp
+    source/math_test.cpp
+    source/base_1d_test.cpp
+    source/wolfram_test.cpp
+)
 target_link_libraries(
     carllib_test PRIVATE
     carllib::carllib
