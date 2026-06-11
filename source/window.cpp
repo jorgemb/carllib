@@ -25,8 +25,8 @@ auto window::create_from_config(std::string_view config_file_name)
 
   // Read values from config file
   auto const title = config_file["window"]["title"].value_or<std::string>("");
-  auto const width = config_file["Window"]["width"].value_or<uint32_t>(800);
-  auto const height = config_file["Window"]["height"].value_or<uint32_t>(800);
+  auto const width = config_file["window"]["width"].value_or<uint32_t>(800);
+  auto const height = config_file["window"]["height"].value_or<uint32_t>(800);
 
   // OpenGL context settings
   auto context = sf::ContextSettings {};

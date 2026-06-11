@@ -20,7 +20,8 @@ ctest --preset=dev          # run tests
 
 CI uses the top-level presets directly (`ci-windows`, `ci-ubuntu`, `ci-macos`), e.g. `cmake --preset=ci-windows -D BUILD_SHARED_LIBS=YES`.
 
-- **Single test**: `ctest --preset=dev -R carllib_test` (there is currently one test target, `carllib_test`).
+- **Single test**: `ctest --preset=dev -R carllib_test` (there is currently one test target, `carllib_test`). Catch2's `catch_discover_tests` registers each `TEST_CASE` as its own ctest entry, so individual cases can be selected by name.
+- **Run the demo**: `cmake --build --preset=dev --target run` builds and launches `carllib_main` with `WORKING_DIRECTORY` set to the project source root so the relative `init.toml` and `42dotSans.ttf` paths resolve.
 - **Format**: build the `format-check` / `format-fix` targets (clang-format). CI runs `cmake -D FORMAT_COMMAND=clang-format-18 -P cmake/lint.cmake`.
 - **Spell**: `spell-check` / `spell-fix` targets (codespell), or `cmake -P cmake/spell.cmake`.
 - **Static analysis**: `ci-ubuntu` enables clang-tidy and cppcheck via the `CMAKE_CXX_CLANG_TIDY` / `CMAKE_CXX_CPPCHECK` cache variables; `.clang-tidy` and `.clang-format` configure them.
@@ -35,19 +36,33 @@ When building with `BUILD_SHARED_LIBS=ON` on Windows, the DLL path (e.g. `build\
 
 ## Architecture
 
-The library is small and the public API lives in `include/carllib/`, implemented in `source/`.
+Public headers live in `include/carllib/<module>/`, implementations in `source/<module>/`. There are three modules — `graphics`, `ca`, `util` — plus the top-level `carllib.hpp` placeholder.
 
-- **`window`** (`window.hpp` / `window.cpp`) — owns the `sf::RenderWindow` and the main loop. It is **move-only** and constructed only via the static `window::create_from_config(config_file)`, which reads window settings from a TOML file (default `init.toml`) and returns `std::optional<window>` (`nullopt` on parse/creation failure). Behavior is injected through two `std::function` callbacks set by the caller:
-  - `set_draw_function(std::function<void(sf::RenderWindow&)>)` — called every frame after `clear`, before `display`.
-  - `set_handle_event_function(std::function<void(sf::Event)>)` — called for every polled event except `Closed` (which the loop handles by stopping).
+### `graphics` — `carllib::graphics`
 
-  `start_loop()` runs poll → draw → display until closed; `stop_loop()` ends it. Each window has its own named `spdlog::logger`.
+- **`window`** (`graphics/window.hpp` / `source/window.cpp`) — owns the `sf::RenderWindow` and the main loop. It is **move-only** and constructed only via the static `window::create_from_config(config_file)`, which reads window settings from a TOML file (default `init.toml`) and returns `std::optional<window>` (`nullopt` on parse/creation failure). Behavior is injected through two `std::function` callbacks set by the caller:
+  - `set_draw_function(std::function<void(sf::RenderWindow&)>)` — called every frame after `clear(sf::Color::Black)`, before `display`.
+  - `set_handle_event_function(std::function<void(sf::RenderWindow&, sf::Event)>)` — called for every polled event except `Closed` (which the loop handles by stopping). Note the **two-arg** signature; the window is passed so handlers can mutate the view (e.g. on `Resized`).
 
-- **`cell_grid`** (`cell_grid.hpp` / `cell_grid.cpp`) — the drawable grid, inheriting `sf::Drawable` + `sf::Transformable`. Backed by a single `sf::VertexArray` of triangles: each cell is a quad = **6 vertices** (`vertices_per_quad`), indexed as `(col + row * width) * 6`. `resize()` rebuilds the whole buffer (dropping prior state) and currently fills cells with random colors. `set_color`/`get_color` are declared but **not yet implemented** in `cell_grid.cpp`.
+  `start_loop()` runs poll → draw → display until closed; `stop_loop()` ends it. Each window has its own `spdlog::logger` (currently the default logger).
 
-- **`carllib.{hpp,cpp}`** — `exported_class`, a placeholder from the cmake-init template (only thing the test exercises). Not part of the real API surface.
+- **`cell_grid`** (`graphics/cell_grid.hpp` / `source/cell_grid.cpp`) — drawable grid, inheriting `sf::Drawable` + `sf::Transformable`. Backed by a single `sf::VertexArray` of triangles: each cell is a quad = **6 vertices** (`vertices_per_quad`), indexed as `(col + row * width) * 6` via `get_first_vertex_of_position`. `resize(new_size, cell_size, randomize_colors)` rebuilds the whole buffer (dropping prior cell state) and parallel-fills cells with random colors when `randomize_colors` is `true` (uses `std::for_each(std::execution::par, ...)` with a `thread_local std::mt19937`). `set_color_at` / `get_color_at` write/read all 6 vertices of the targeted quad and return `bool` / `std::optional<sf::Color>`; out-of-range positions fail rather than throw.
 
-- **`main.cpp`** — the demo wiring: creates a window from config, builds a `cell_grid`, and registers draw/event lambdas (mouse-wheel zoom clamped to `[0.1, 1.2]`).
+### `ca` — `carllib::ca` (cellular automata)
+
+- **`base_1d<StoredValue>`** (`ca/base_1d.hpp`, header-only template; `source/ca/base_1d.cpp` is currently empty) — generic 1D CA with toroidal wrapping. Stores the **full generation history** in a `std::vector<std::vector<StoredValue>>`; `get_generation_data(n)` returns generation `n` by const ref. For `StoredValue = bool`, the width-only constructor seeds a single `true` cell at `width / 2`; other constructors take an initializer list or input iterator pair. `calculate_next_generation()` is `virtual` — the base implementation just copies the previous generation; subclasses override to produce real rules and append via the protected `add_generation()` (which width-checks).
+
+- **`wolfram`** (`ca/wolfram.hpp` / `source/ca/wolfram.cpp`) — derives from `base_1d<bool>` and implements Wolfram **elementary 1D CA** (rule 0–255, wrapped in the `wolfram_number` strong type). The triad `(left, current, right)` forms a 3-bit index; bit `triad` of the rule byte gives the next cell. Neighbors wrap toroidally (first/last cell wrap to last/first). Operands are cast to `unsigned` before bitwise ops to avoid the `hicpp-signed-bitwise` clang-tidy warning.
+
+### `util` — `carllib::util`
+
+- **`math.hpp`** — `wrap(value, lower, upper)` for signed integers (constrained by a `signed_integral` concept). Used for toroidal indexing in CA code.
+
+### Top level
+
+- **`carllib.{hpp,cpp}`** — `exported_class`, a placeholder from the cmake-init template (the only thing `carllib_test` exercises). Not part of the real API surface.
+
+- **`source/main.cpp`** — demo wiring. Precomputes 800 generations of Wolfram **rule 110** on a 4000-cell ring, then each frame: resizes the `cell_grid` to fit the current window divided by `zoom`, advances one generation if more rows are visible, paints each cell black/white from `ca_line.get_generation_data(row)` (centering the visible window inside the wider ring via `std::views::drop((ca_line.width() - width)/2)`), and overlays a zoom/size text using `42dotSans.ttf`. Mouse-wheel zoom is clamped to `[1, 32]`; `sf::Event::Resized` updates the view to the new window dimensions.
 
 ### Export header
 
@@ -55,11 +70,12 @@ The library is small and the public API lives in `include/carllib/`, implemented
 
 ## Conventions
 
-- C++20, `snake_case` for types and members (members prefixed `m_`), trailing-return-type style (`auto fn() -> T`).
+- **C++23** (`target_compile_features(... cxx_std_23)` on the library, executable, and test target — the public include is still advertised as `cxx_std_23` PUBLIC). `snake_case` for types and members (members prefixed `m_`), trailing-return-type style (`auto fn() -> T`).
 - Doxygen comments on public methods.
-- The compiler warning set is strict (see the `flags-*` presets): `-Wconversion -Wsign-conversion -Wold-style-cast -Wshadow` etc. on GCC/Clang, `/W4 /permissive-` plus many `/wNNNN` on MSVC. New code is expected to compile clean under these.
+- The compiler warning set is strict (see the `flags-*` presets): `-Wconversion -Wsign-conversion -Wold-style-cast -Wshadow` etc. on GCC/Clang, `/W4 /permissive-` plus many `/wNNNN` on MSVC. New code is expected to compile clean under these. clang-tidy is enabled in `ci-ubuntu`; `hicpp-signed-bitwise` in particular bites raw `bool`/`int` bitwise math — cast to `unsigned` (see `wolfram.cpp` for the pattern).
 
 ## Notes / Gotchas
 
+- **The demo must run from the project source root.** `main.cpp` loads `42dotSans.ttf` and `init.toml` by relative path. The `run` custom target sets `WORKING_DIRECTORY` correctly; if you launch `carllib_main` directly from `build/dev/`, font/config loading will fail.
 - The CI workflow (`.github/workflows/ci.yml`) triggers on `master`, but the working branch is `main`, and the coverage/docs jobs are gated behind `&& false` with a `<name>` placeholder — CI is effectively unconfigured for this fork.
 - `README.md`, license, and homepage URL are still cmake-init placeholders.

@@ -26,7 +26,6 @@ add_library(
         include/carllib/graphics/window.hpp
         source/cell_grid.cpp
         include/carllib/graphics/cell_grid.hpp
-        source/ca/base_1d.cpp
         include/carllib/ca/base_1d.hpp
         include/carllib/util/math.hpp
         source/ca/wolfram.cpp

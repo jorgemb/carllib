@@ -81,13 +81,7 @@ public:
    * space.
    * @return
    */
-  virtual auto calculate_next_generation() -> std::size_t {
-    // Copy the previous generation
-    auto const& last = m_data.back();
-    m_data.emplace_back(last.begin(), last.end());
-
-    return m_data.size();
-  }
+  virtual auto calculate_next_generation() -> std::size_t = 0;
 
   /**
    * Returns the total amount of calculated generations
