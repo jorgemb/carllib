@@ -23,7 +23,7 @@ target_link_libraries(
     carllib::carllib
     Catch2::Catch2WithMain
 )
-target_compile_features(carllib_test PRIVATE cxx_std_20)
+target_compile_features(carllib_test PRIVATE cxx_std_23)
 
 # Register each Catch2 TEST_CASE as a separate CTest test.
 catch_discover_tests(carllib_test)

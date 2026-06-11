@@ -23,7 +23,20 @@ public:
   using generation = std::vector<StoredValue>;
 
   /**
-   * Default constructor
+   * Default starting point, single true cell in the middel
+   * @param width
+   */
+
+  explicit linear_toroidal(const std::size_t width) requires(std::is_same_v<StoredValue, bool>) : m_width(width) {
+    // Calculate mid-point
+    const auto middle = width / 2;
+    auto starting_generation = std::vector(width, false);
+    starting_generation.at(middle) = true;
+    m_data.push_back(std::move(starting_generation));
+  }
+
+  /**
+   * Constructor with initializer list
    */
   linear_toroidal(std::initializer_list<StoredValue> initial_generation)
       : m_width(initial_generation.size()) {
@@ -50,7 +63,7 @@ public:
       -> linear_toroidal& = default;
 
   // Destructor
-  ~linear_toroidal() = default;
+  virtual ~linear_toroidal() = default;
 
   /**
    * Returns the full data of the generation
@@ -66,8 +79,12 @@ public:
    * space.
    * @return
    */
-  auto calculate_next_generation() -> std::size_t {
-    throw std::runtime_error {"Not implemented"};
+  virtual auto calculate_next_generation() -> std::size_t {
+    // Copy the previous generation
+    auto const &last = m_data.back();
+    m_data.emplace_back(last.begin(), last.end());
+
+    return m_data.size();
   }
 
   /**

@@ -76,7 +76,7 @@ target_include_directories(
     "\$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
 
-target_compile_features(carllib_carllib PUBLIC cxx_std_20)
+target_compile_features(carllib_carllib PUBLIC cxx_std_23)
 
 # ---- Declare executable ----
 
@@ -87,7 +87,7 @@ add_executable(carllib_exe::exe ALIAS carllib_exe)
 
 set_property(TARGET carllib_exe PROPERTY OUTPUT_NAME carllib_main)
 
-target_compile_features(carllib_exe PRIVATE cxx_std_20)
+target_compile_features(carllib_exe PRIVATE cxx_std_23)
 
 target_link_libraries(carllib_exe PRIVATE carllib::carllib fmt::fmt)
 

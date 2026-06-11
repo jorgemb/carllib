@@ -4,6 +4,7 @@
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
+#include <ranges>
 
 #include "carllib/ca/linear_toroidal.hpp"
 #include "carllib/graphics/cell_grid.hpp"
@@ -21,7 +22,7 @@ auto main() -> int {
   auto zoom = 1;
   auto zoom_text = sf::Text {font};
 
-  auto ca_line = carllib::ca::linear_toroidal<bool> {false, false, true, false, false};
+  auto ca_line = carllib::ca::linear_toroidal<bool>(800);
 
   // Add functions
   main_window->set_draw_function(
@@ -46,13 +47,18 @@ auto main() -> int {
                       /*randomize_colors=*/true);
         }
 
+        // Calculate a new generation
+        if (ca_line.total_generations() < height) {
+          ca_line.calculate_next_generation();
+        }
+
         // Fill in the grid cell
         for (auto row = 0U; row < ca_line.total_generations(); ++row) {
-          for (auto const &col: ca_line.get_generation_data(row)) {
-            const auto color = col
+          for (auto const [col, value]: std::views::enumerate(ca_line.get_generation_data(row))) {
+            const auto color = value
                 ? sf::Color::Black
                 : sf::Color::White;
-            grid.set_color_at({row, col}, color);
+            grid.set_color_at({static_cast<unsigned>(col), row}, color);
           }
         }
 
