@@ -26,9 +26,11 @@ add_library(
         include/carllib/graphics/window.hpp
         source/cell_grid.cpp
         include/carllib/graphics/cell_grid.hpp
-        source/ca/linear_toroidal.cpp
-        include/carllib/ca/linear_toroidal.hpp
+        source/ca/base_1d.cpp
+        include/carllib/ca/base_1d.hpp
         include/carllib/util/math.hpp
+        source/ca/wolfram.cpp
+        include/carllib/ca/wolfram.hpp
 )
 add_library(carllib::carllib ALIAS carllib_carllib)
 

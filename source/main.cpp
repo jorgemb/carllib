@@ -1,12 +1,14 @@
+#include <ranges>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window.hpp>
 #include <fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
-#include <ranges>
 
-#include "carllib/ca/linear_toroidal.hpp"
+#include "carllib/ca/base_1d.hpp"
+#include "carllib/ca/wolfram.hpp"
 #include "carllib/graphics/cell_grid.hpp"
 #include "carllib/graphics/window.hpp"
 
@@ -19,10 +21,13 @@ auto main() -> int {
 
   auto font = sf::Font("42dotSans.ttf");
   auto grid = carllib::graphics::cell_grid({10, 10}, 1);
-  auto zoom = 1;
+  auto zoom = 4;
   auto zoom_text = sf::Text {font};
 
-  auto ca_line = carllib::ca::linear_toroidal<bool>(800);
+  auto ca_line = carllib::ca::wolfram(carllib::ca::wolfram_number {110}, 4000);
+  while (ca_line.total_generations() < 800) {
+    ca_line.calculate_next_generation();
+  }
 
   // Add functions
   main_window->set_draw_function(
@@ -54,11 +59,11 @@ auto main() -> int {
 
         // Fill in the grid cell
         for (auto row = 0U; row < ca_line.total_generations(); ++row) {
-          for (auto const [col, value]: std::views::enumerate(ca_line.get_generation_data(row))) {
-            const auto color = value
-                ? sf::Color::Black
-                : sf::Color::White;
-            grid.set_color_at({static_cast<unsigned>(col), row}, color);
+          for (auto const [col, value] : std::views::enumerate(
+                   ca_line.get_generation_data(row) | std::views::drop((ca_line.width() - width)/2)))
+          {
+        const auto color = value ? sf::Color::Black : sf::Color::White;
+        grid.set_color_at({static_cast<unsigned>(col), row}, color);
           }
         }
 

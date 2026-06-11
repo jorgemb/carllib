@@ -18,7 +18,7 @@ namespace carllib::ca
  * Represents a 1D cellular automaton with toroidal wrapping
  */
 template<class StoredValue>
-class linear_toroidal {
+class base_1d {
 public:
   using generation = std::vector<StoredValue>;
 
@@ -27,7 +27,9 @@ public:
    * @param width
    */
 
-  explicit linear_toroidal(const std::size_t width) requires(std::is_same_v<StoredValue, bool>) : m_width(width) {
+  explicit base_1d(const std::size_t width)
+    requires(std::is_same_v<StoredValue, bool>)
+      : m_width(width) {
     // Calculate mid-point
     const auto middle = width / 2;
     auto starting_generation = std::vector(width, false);
@@ -38,7 +40,7 @@ public:
   /**
    * Constructor with initializer list
    */
-  linear_toroidal(std::initializer_list<StoredValue> initial_generation)
+  base_1d(std::initializer_list<StoredValue> initial_generation)
       : m_width(initial_generation.size()) {
     m_data.emplace_back(std::move(initial_generation));
   }
@@ -50,20 +52,20 @@ public:
    * @param end
    */
   template<std::input_iterator Iterator>
-  linear_toroidal(Iterator begin, Iterator end)
+  base_1d(Iterator begin, Iterator end)
       : m_width(std::distance(begin, end)) {
     m_data.emplace_back({begin, end});
   }
 
   // Copy and move operations
-  linear_toroidal(const linear_toroidal& other) = default;
-  linear_toroidal(linear_toroidal&& other) noexcept = default;
-  auto operator=(const linear_toroidal& other) -> linear_toroidal& = default;
-  auto operator=(linear_toroidal&& other) noexcept
-      -> linear_toroidal& = default;
+  base_1d(const base_1d& other) = default;
+  base_1d(base_1d&& other) noexcept = default;
+  auto operator=(const base_1d& other) -> base_1d& = default;
+  auto operator=(base_1d&& other) noexcept
+      -> base_1d& = default;
 
   // Destructor
-  virtual ~linear_toroidal() = default;
+  virtual ~base_1d() = default;
 
   /**
    * Returns the full data of the generation
@@ -81,7 +83,7 @@ public:
    */
   virtual auto calculate_next_generation() -> std::size_t {
     // Copy the previous generation
-    auto const &last = m_data.back();
+    auto const& last = m_data.back();
     m_data.emplace_back(last.begin(), last.end());
 
     return m_data.size();
@@ -95,6 +97,23 @@ public:
 
   // Getters
   auto width() const -> std::size_t { return m_width; }
+
+protected:
+  /**
+   * Adds a new generation to the automaton. The new generation must have the
+   * same width as the rest.
+   * @param new_generation
+   * @return
+   */
+  auto add_generation(std::vector<StoredValue>&& new_generation) -> std::size_t {
+    if (new_generation.size() != m_width) {
+      throw std::runtime_error(
+          "Attempting to add a generation that is of wrong width");
+    }
+
+    m_data.push_back(std::move(new_generation));
+    return m_data.size();
+  }
 
 private:
   // Stored values
