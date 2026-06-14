@@ -25,6 +25,11 @@ public:
    */
   cell_grid(sf::Vector2u initial_size, std::uint32_t cell_size);
 
+  /**
+   * Default constructor
+   */
+  cell_grid();
+
   // Constructors and operations
   cell_grid(const cell_grid& other) = default;
   cell_grid(cell_grid&& other) noexcept = default;
