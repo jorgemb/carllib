@@ -18,18 +18,21 @@ namespace
 class wolfram_window : public graphics::window {
 public:
   explicit wolfram_window(ca::wolfram_number rule_number,
+                          ca::initial_condition initial_condition,
                           std::uint8_t zoom,
                           std::string_view config_file = "init.toml")
       : window(graphics::create_from_config(config_file))
       , m_zoom(zoom)
-      , m_rule_number(rule_number) {}
+      , m_rule_number(rule_number)
+      , m_initial_condition(initial_condition) {}
 
   void on_setup() override {
     // Load font
     m_font = sf::Font("42dotSans.ttf");
 
     // Create and initialize ca
-    m_wolfram_ca = std::make_optional<ca::wolfram>(m_rule_number, m_rule_width);
+    m_wolfram_ca = std::make_optional<ca::wolfram>(
+        m_rule_number, m_rule_width, m_initial_condition);
 
     // Create text
     m_display_text = std::make_optional<sf::Text>(m_font);
@@ -102,6 +105,7 @@ private:
   std::optional<sf::Text> m_display_text;
 
   ca::wolfram_number m_rule_number {90};
+  ca::initial_condition m_initial_condition;
   const std::size_t m_rule_width = 4000;
   std::optional<ca::wolfram> m_wolfram_ca;
 };
@@ -118,14 +122,22 @@ auto main(int argc, char* argv[]) -> int {
   auto zoom = std::uint8_t {4};
   app.add_option("-z, --zoom", zoom, "Initial zoom value")->default_val(4);
 
+  auto random = false;
+  app.add_flag("--random", random, "Use random initial condition");
+
+
   auto config_file = std::string {"init.toml"};
   app.add_option("-c,--config", config_file, "Path to config file")
       ->check(CLI::ExistingFile);
   CLI11_PARSE(app, argc, argv);
 
+  // Check if random initial condition
+  auto initial_condition =
+      random ? ca::initial_condition::random : ca::initial_condition::standard;
+
   // Start main window
-  auto main_window =
-      wolfram_window(ca::wolfram_number {rule_number}, zoom, config_file);
+  auto main_window = wolfram_window(
+      ca::wolfram_number {rule_number}, initial_condition, zoom, config_file);
 
   return main_window.start_loop();
 }

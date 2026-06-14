@@ -27,16 +27,17 @@ public:
    * @param rule
    * @param width
    */
-  wolfram(wolfram_number rule, std::size_t width);
+  wolfram(wolfram_number rule,
+          std::size_t width,
+          initial_condition init_condition = initial_condition::standard);
 
   /**
    * Calculate the next generation given the inital rule.
    * @return
    */
   auto calculate_next_generation() -> std::size_t override;
+
 private:
-
-
   wolfram_number m_rule_number;
 };
 

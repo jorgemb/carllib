@@ -6,8 +6,8 @@
 
 namespace carllib::ca
 {
-wolfram::wolfram(const wolfram_number rule, const std::size_t width)
-    : base_1d(width)
+wolfram::wolfram(const wolfram_number rule, const std::size_t width, initial_condition init_condition)
+    : base_1d(width, init_condition)
     , m_rule_number(rule) {}
 
 auto wolfram::calculate_next_generation() -> std::size_t {
