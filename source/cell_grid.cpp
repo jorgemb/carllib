@@ -33,6 +33,8 @@ cell_grid::cell_grid(const sf::Vector2u initial_size,
   resize(initial_size, cell_size, /*randomize_colors=*/true);
 }
 
+cell_grid::cell_grid(): cell_grid({1, 1}, 1) {}
+
 auto cell_grid::resize(sf::Vector2u new_size,
                        const std::uint32_t cell_size,
                        const bool randomize_colors) -> bool {

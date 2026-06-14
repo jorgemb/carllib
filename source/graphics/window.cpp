@@ -9,8 +9,7 @@
 namespace carllib::graphics
 {
 
-auto window::create_from_config(std::string_view config_file_name)
-    -> std::optional<window> {
+auto create_from_config(std::string_view config_file_name) -> sf::RenderWindow {
   // Open config file
   spdlog::info("Loading config file: {}", config_file_name);
   auto config_file = toml::table();
@@ -20,7 +19,7 @@ auto window::create_from_config(std::string_view config_file_name)
     spdlog::error("Error while parsing config file: {}. Error: {}",
                   config_file_name,
                   error.description());
-    return std::nullopt;
+    throw std::runtime_error("Couldn't create window");
   }
 
   // Read values from config file
@@ -42,51 +41,57 @@ auto window::create_from_config(std::string_view config_file_name)
                                         context);
   if (!render_window.setActive(true)) {
     spdlog::error("Couldn't set main active window");
-    return std::nullopt;
+    throw std::runtime_error("Couldn't create window");
   }
 
-  auto main_window = window(std::move(render_window));
-  return std::make_optional<window>(std::move(main_window));
+  return render_window;
 }
 
 auto window::start_loop() -> int {
+  on_setup();
+
   // Main loop
   while (m_is_running) {
     // Handle messages
     while (const auto event = m_render_window.pollEvent()) {
-      // Close the window
-      if (event->is<sf::Event::Closed>()) {
-        m_logger->info("Window is being closed");
-        m_is_running = false;
-      } else {
-        if (m_handle_event_function) {
-          m_handle_event_function.value()(m_render_window, *event);
-        }
-      }
+      on_handle_event(*event);
     }
 
+    // Handle logic
+    on_logic();
+
     // Handle drawing
-    m_render_window.clear(sf::Color::Black);
-    draw();
-    m_render_window.display();
+    on_draw();
   }
 
+  on_teardown();
   return 0;
 }
 
 void window::stop_loop() {
-  m_logger->info("Closing Window");
+  spdlog::info("Closing Window");
   m_is_running = false;
 }
 
-void window::draw() {
-  if (m_draw_function) {
-    (*m_draw_function)(m_render_window);
+void window::on_draw() {
+  m_render_window.clear(sf::Color::Magenta);
+  m_render_window.display();
+}
+
+void window::on_handle_event(const sf::Event& event) {
+  if (event.getIf<sf::Event::Closed>() != nullptr) {
+    // Handle exit
+    stop_loop();
+  } else if (const auto* resize_event = event.getIf<sf::Event::Resized>()) {
+    // Update view to match window size
+    const sf::FloatRect visibleArea({0.f, 0.f},
+                                    {static_cast<float>(resize_event->size.x),
+                                     static_cast<float>(resize_event->size.y)});
+    m_render_window.setView(sf::View(visibleArea));
   }
 }
 
 window::window(sf::RenderWindow&& render_window)
-    : m_render_window(std::move(render_window))
-    , m_logger(spdlog::default_logger()) {}
+    : m_render_window(std::move(render_window)) {}
 
 }  // namespace carllib::graphics

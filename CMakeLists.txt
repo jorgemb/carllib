@@ -22,7 +22,7 @@ find_package(tomlplusplus REQUIRED)
 add_library(
     carllib_carllib
     source/carllib.cpp
-        source/window.cpp
+        source/graphics/window.cpp
         include/carllib/graphics/window.hpp
         source/cell_grid.cpp
         include/carllib/graphics/cell_grid.hpp
@@ -79,19 +79,8 @@ target_include_directories(
 
 target_compile_features(carllib_carllib PUBLIC cxx_std_23)
 
-# ---- Declare executable ----
-
-find_package(fmt REQUIRED)
-
-add_executable(carllib_exe source/main.cpp)
-add_executable(carllib_exe::exe ALIAS carllib_exe)
-
-set_property(TARGET carllib_exe PROPERTY OUTPUT_NAME carllib_main)
-
-target_compile_features(carllib_exe PRIVATE cxx_std_23)
-
-target_link_libraries(carllib_exe PRIVATE carllib::carllib fmt::fmt)
-
+# ---- Binaries ---
+add_subdirectory(apps/wolfram)
 
 # ---- Install rules ----
 
@@ -112,14 +101,12 @@ endif()
 
 include(cmake/dev-mode.cmake)
 
-# ---- Run target ----
-
 # Convenience target: builds carllib_exe and runs it from the source root so
 # that relative config paths (e.g. init.toml) resolve correctly.
-add_custom_target(
-    run
-    COMMAND carllib_exe
-    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    USES_TERMINAL
-    VERBATIM
-)
+#add_custom_target(
+#    run
+#    COMMAND carllib_exe
+#    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+#    USES_TERMINAL
+#    VERBATIM
+#)
