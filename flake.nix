@@ -34,6 +34,8 @@
 	  libGL
 	  libGLU
 	  glm 		# OpenGL math library
+
+	  cli11		# Command line parsing
         ];
 
         # Tell CMake to use gcc

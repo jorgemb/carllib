@@ -4,6 +4,7 @@
 
 #include <ranges>
 
+#include <CLI/CLI.hpp>
 #include <carllib/graphics/window.hpp>
 
 #include "carllib/ca/base_1d.hpp"
@@ -16,8 +17,12 @@ namespace
 {
 class wolfram_window : public graphics::window {
 public:
-  explicit wolfram_window(std::string_view config_file = "init.toml")
-      : window(graphics::create_from_config(config_file)) {}
+  explicit wolfram_window(ca::wolfram_number rule_number,
+                          std::uint8_t zoom,
+                          std::string_view config_file = "init.toml")
+      : window(graphics::create_from_config(config_file))
+      , m_zoom(zoom)
+      , m_rule_number(rule_number) {}
 
   void on_setup() override {
     // Load font
@@ -102,8 +107,25 @@ private:
 };
 }  // namespace
 
-auto main() -> int {
-  auto main_window = wolfram_window();
+auto main(int argc, char* argv[]) -> int {
+  // Parse arguments
+  auto app = CLI::App {"Calculate Wolfram essential Cellular Automata"};
+  argv = app.ensure_utf8(argv);
+
+  auto rule_number = std::uint8_t {};
+  app.add_option("-r, --rule", rule_number, "Rule number to use")->required();
+
+  auto zoom = std::uint8_t {4};
+  app.add_option("-z, --zoom", zoom, "Initial zoom value")->default_val(4);
+
+  auto config_file = std::string {"init.toml"};
+  app.add_option("-c,--config", config_file, "Path to config file")
+      ->check(CLI::ExistingFile);
+  CLI11_PARSE(app, argc, argv);
+
+  // Start main window
+  auto main_window =
+      wolfram_window(ca::wolfram_number {rule_number}, zoom, config_file);
 
   return main_window.start_loop();
 }
