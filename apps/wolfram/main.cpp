@@ -28,7 +28,7 @@ public:
 
   void on_setup() override {
     // Load font
-    m_font = sf::Font("42dotSans.ttf");
+    m_font = sf::Font("external/42dotSans.ttf");
 
     // Create and initialize ca
     m_wolfram_ca = std::make_optional<ca::wolfram>(

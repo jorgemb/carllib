@@ -2,8 +2,12 @@
 // Created by jorge on 01/06/2026.
 //
 
+#include <string_view>
+
 #include "carllib/graphics/window.hpp"
 
+#include <SFML/Window.hpp>
+#include <spdlog/spdlog.h>
 #include <toml++/toml.hpp>
 
 namespace carllib::graphics
