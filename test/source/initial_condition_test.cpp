@@ -22,7 +22,8 @@ TEST_CASE("visitor pattern for initial condition", "[ca][initial_condition]") {
   // Random start
   constexpr auto random_seed = std::size_t {42};
   auto random_start = init::initial_condition {init::randomized {random_seed}};
-  random_start.visit(util::overload {
-      [](init::standard&) -> void { FAIL("Standard not expected"); },
-      [](init::randomized& random) -> void { CHECK(random.seed == random_seed); }})
+  random_start.visit(util::overload {[](init::standard&) -> void
+                                     { FAIL("Standard not expected"); },
+                                     [](init::randomized& random) -> void
+                                     { CHECK(random.seed == random_seed); }});
 }

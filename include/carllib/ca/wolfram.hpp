@@ -26,11 +26,12 @@ public:
    * Default constructor, receives the rule number and the width.
    * @param rule
    * @param width
-   * @param init_condition
+   * @param initial_condition
    */
   wolfram(wolfram_number rule,
           std::size_t width,
-          initial_condition init_condition = initial_condition::standard);
+          initialization::initial_condition initial_condition =
+              initialization::standard {});
 
   /**
    * Calculate the next generation given the inital rule.

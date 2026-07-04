@@ -9,6 +9,6 @@ namespace carllib::util
 {
 template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
 template<class... Ts> overload(Ts...) -> overload<Ts...>;
-} // carllib::util
+} // namespace carllib::util
 
 #endif  // CARLLIB_VARIANT_HPP
