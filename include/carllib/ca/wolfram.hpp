@@ -26,6 +26,7 @@ public:
    * Default constructor, receives the rule number and the width.
    * @param rule
    * @param width
+   * @param init_condition
    */
   wolfram(wolfram_number rule,
           std::size_t width,

@@ -18,7 +18,7 @@ namespace carllib::ca
 /**
  * Represents the initial condition to apply
  */
-enum initial_condition
+enum class initial_condition : std::uint8_t
 {
   standard,
   random
