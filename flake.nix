@@ -14,7 +14,7 @@
     {
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
-          gcc
+          gcc16
           clang-tools # clangd, clang-format, etc.
           cmake
           cppcheck

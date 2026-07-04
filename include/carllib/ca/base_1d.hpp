@@ -10,19 +10,11 @@
 #include <stdexcept>
 #include <vector>
 
-#include "carllib/util/math.hpp"
+#include "carllib/ca/initialization.hpp"
+#include "carllib/util/variant.hpp"
 
 namespace carllib::ca
 {
-
-/**
- * Represents the initial condition to apply
- */
-enum initial_condition
-{
-  standard,
-  random
-};
 
 /**
  * Represents a 1D cellular automaton with toroidal wrapping
@@ -37,34 +29,33 @@ public:
    * @param width
    * @param init_condition
    */
-  explicit base_1d(
-      const std::size_t width,
-      initial_condition init_condition = initial_condition::standard)
+  explicit base_1d(const std::size_t width,
+                   initialization::initial_condition init_condition =
+                       initialization::standard {})
     requires(std::is_same_v<StoredValue, bool>)
       : m_width(width) {
-    switch (init_condition) {
-      case initial_condition::standard: {
-        // Calculate mid-point
-        const auto middle = width / 2;
-        auto starting_generation = std::vector(width, false);
-        starting_generation.at(middle) = true;
-        m_data.push_back(std::move(starting_generation));
-        break;
-      }
-      case initial_condition::random: {
-        auto random_engine =
-            std::default_random_engine {std::random_device {}()};
-        auto random_generator = std::bernoulli_distribution {0.5};
-        auto starting_generation = std::vector(width, false);
-        std::ranges::generate(starting_generation,
-                              [&random_engine, &random_generator]() -> bool
-                              { return random_generator(random_engine); });
-        m_data.push_back(starting_generation);
-        break;
-      }
-      default:
-        throw std::runtime_error("Non recognized initial condition to base_1d");
-    }
+    // Check initial conditions
+    auto starting_generation = init_condition.visit(util::overload {
+        [width](initialization::standard&) -> auto
+        {
+          const auto middle = width / 2;
+          auto new_generation = std::vector(width, false);
+          new_generation.at(middle) = true;
+          return new_generation;
+        },
+        [width](initialization::randomized& randomized) -> auto
+        {
+          auto random_engine = std::default_random_engine {randomized.seed};
+          auto constexpr probability = 0.5;
+          auto random_generator = std::bernoulli_distribution {probability};
+          auto new_generation = std::vector(width, false);
+          std::ranges::generate(new_generation,
+                                [&random_engine, &random_generator]() -> bool
+                                { return random_generator(random_engine); });
+          return new_generation;
+        }});
+
+    m_data.push_back(starting_generation);
   }
 
   /**

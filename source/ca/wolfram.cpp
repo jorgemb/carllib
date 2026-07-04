@@ -2,12 +2,21 @@
 // Created by jorge on 11/06/2026.
 //
 
+#include <cstddef>
+#include <utility>
+#include <vector>
+
 #include "carllib/ca/wolfram.hpp"
+
+#include "carllib/ca/base_1d.hpp"
+#include "carllib/ca/initialization.hpp"
 
 namespace carllib::ca
 {
-wolfram::wolfram(const wolfram_number rule, const std::size_t width, initial_condition init_condition)
-    : base_1d(width, init_condition)
+wolfram::wolfram(const wolfram_number rule,
+                 const std::size_t width,
+                 initialization::initial_condition initial_condition)
+    : base_1d(width, initial_condition)
     , m_rule_number(rule) {}
 
 auto wolfram::calculate_next_generation() -> std::size_t {

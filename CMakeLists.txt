@@ -30,6 +30,8 @@ add_library(
         include/carllib/util/math.hpp
         source/ca/wolfram.cpp
         include/carllib/ca/wolfram.hpp
+        include/carllib/ca/initialization.hpp
+        include/carllib/util/variant.hpp
 )
 add_library(carllib::carllib ALIAS carllib_carllib)
 
@@ -77,7 +79,7 @@ target_include_directories(
     "\$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
 
-target_compile_features(carllib_carllib PUBLIC cxx_std_23)
+target_compile_features(carllib_carllib PUBLIC cxx_std_26)
 
 # ---- Binaries ---
 add_subdirectory(apps/wolfram)

@@ -2,12 +2,16 @@
 /// Implements the Wolfram essential Cellular Automata
 ///
 
+#include <cstdint>
+#include <optional>
 #include <ranges>
+#include <string_view>
+#include <cmath>
 
 #include <CLI/CLI.hpp>
 #include <carllib/graphics/window.hpp>
 
-#include "carllib/ca/base_1d.hpp"
+#include "carllib/ca/initialization.hpp"
 #include "carllib/ca/wolfram.hpp"
 #include "carllib/graphics/cell_grid.hpp"
 
@@ -18,7 +22,7 @@ namespace
 class wolfram_window : public graphics::window {
 public:
   explicit wolfram_window(ca::wolfram_number rule_number,
-                          ca::initial_condition initial_condition,
+                          initialization::initial_condition initial_condition,
                           std::uint8_t zoom,
                           std::string_view config_file = "init.toml")
       : window(graphics::create_from_config(config_file))
@@ -45,9 +49,11 @@ public:
     m_render_window.draw(m_grid);
 
     // Draw text
-    m_display_text->setFillColor(sf::Color::Black);
-    m_display_text->setStyle(sf::Text::Style::Bold);
-    m_render_window.draw(*m_display_text);
+    if (m_display_text) {
+      m_display_text->setFillColor(sf::Color::Black);
+      m_display_text->setStyle(sf::Text::Style::Bold);
+      m_render_window.draw(*m_display_text);
+    }
 
     m_render_window.display();
   }
@@ -105,7 +111,7 @@ private:
   std::optional<sf::Text> m_display_text;
 
   ca::wolfram_number m_rule_number {90};
-  ca::initial_condition m_initial_condition;
+  initialization::initial_condition m_initial_condition;
   const std::size_t m_rule_width = 4000;
   std::optional<ca::wolfram> m_wolfram_ca;
 };
@@ -125,15 +131,16 @@ auto main(int argc, char* argv[]) -> int {
   auto random = false;
   app.add_flag("--random", random, "Use random initial condition");
 
-
   auto config_file = std::string {"init.toml"};
   app.add_option("-c,--config", config_file, "Path to config file")
       ->check(CLI::ExistingFile);
   CLI11_PARSE(app, argc, argv);
 
   // Check if random initial condition
-  auto initial_condition =
-      random ? ca::initial_condition::random : ca::initial_condition::standard;
+  auto initial_condition = random
+      ? initialization::initial_condition {initialization::randomized {
+            std::random_device {}()}}
+      : initialization::initial_condition {initialization::standard {}};
 
   // Start main window
   auto main_window = wolfram_window(
